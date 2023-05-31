@@ -37,6 +37,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.chassis.ChassisConstants.SwerveModuleConstants;
+import frc.robot.subsystems.chassis.utils.Gyro;
+import frc.robot.subsystems.chassis.utils.PPSwerveControl;
 import frc.robot.subsystems.chassis.utils.SwerveModule;
 import frc.robot.utilities.Vision;
 import frc.robot.utilities.UtilsGeneral;
@@ -50,10 +52,10 @@ public class Chassis extends SubsystemBase {
 
     private final Field2d field;
     private final SwerveModule[] modules;
-    private final PigeonIMU gyro;
+    private final Gyro gyro;
     private final SwerveDrivePoseEstimator poseEstimator;
     private final PIDController angleController;
-    private final double startRoll, startPitch;
+    private final double startRoll = 0, startPitch = 0;
     private boolean isBreak;
 
     private Translation2d lastVel;
@@ -77,7 +79,7 @@ public class Chassis extends SubsystemBase {
     private Chassis() {
         field = new Field2d();
         pathDisplay = new Field2d();
-        gyro = new PigeonIMU(ChassisConstants.GYRO_ID);
+        gyro = new Gyro();
         modules = new SwerveModule[] {
                 new SwerveModule(SwerveModuleConstants.FRONT_LEFT),
                 new SwerveModule(SwerveModuleConstants.FRONT_RIGHT),
@@ -96,16 +98,13 @@ public class Chassis extends SubsystemBase {
                 Constants.ODOMETRY_TRUST_VALUE));
         isBreak = true;
 
-        startPitch = gyro.getPitch();
-        startRoll = gyro.getRoll();
-
         setupPathDisplay();
 
         lastVel = new Translation2d();
     }
 
     private void setupPathDisplay() {
-        PPSwerveControllerCommand.setLoggingCallbacks((traj) -> {
+        PPSwerveControl.setLoggingCallbacks((traj) -> {
             pathDisplay.getObject("traj").setTrajectory(traj);
         }, pathDisplay::setRobotPose, null, null);
     }
@@ -116,7 +115,7 @@ public class Chassis extends SubsystemBase {
      * @return The angle of the robot, between 0 and 360 degrees
      */
     public double getGyroAngle() {
-        return UtilsGeneral.normalizeDegrees(gyro.getFusedHeading());
+        return UtilsGeneral.normalizeDegrees(gyro.GetAngle());
     }
 
     /**
@@ -163,6 +162,10 @@ public class Chassis extends SubsystemBase {
         else {
             ChassisSpeeds speeds = ChassisSpeeds.fromFieldRelativeSpeeds(vx, vy, omega, getRotation());
             SwerveModuleState[] states = ChassisConstants.KINEMATICS.toSwerveModuleStates(speeds);
+            // System.out.println("SPEEDS: -------------------------------");
+            // System.out.println(vx);
+            // System.out.println(vy);
+            // System.out.println(omega);
             setModuleStates(states);
         }
     }
@@ -224,6 +227,9 @@ public class Chassis extends SubsystemBase {
             states[i] = SwerveModuleState.optimize(states[i], modules[i].getAngleRotation());
             modules[i].setState(states[i]);
         }
+
+        ChassisSpeeds tempSpeed = ChassisConstants.KINEMATICS.toChassisSpeeds(states);
+        gyro.setSpeedDS(Math.toDegrees(tempSpeed.omegaRadiansPerSecond));
     }
 
     /**
@@ -280,8 +286,8 @@ public class Chassis extends SubsystemBase {
      * forward of the field
      */
     public void resetAngle() {
-        gyro.setYaw(0);
-        gyro.setFusedHeading(0);
+        //gyro.setYaw(0);
+        //gyro.setFusedHeading(0);
         Rotation2d rotation = getGyroRotation();
         poseEstimator.resetPosition(getGyroRotation(), getModulePositions(),
                 new Pose2d(poseEstimator.getEstimatedPosition().getTranslation(), rotation));
@@ -291,8 +297,8 @@ public class Chassis extends SubsystemBase {
         double angle = DriverStation.getAlliance() == Alliance.Blue? 180 : 0;
         // double angle = !UtilsGeneral.isRedAlliance() ? 180 : 0;
         System.out.println(angle);
-        gyro.setYaw(0);
-        gyro.setFusedHeading(0);
+        //gyro.setYaw(0);
+        //gyro.setFusedHeading(0);
         Rotation2d rotation = getGyroRotation();
         poseEstimator.resetPosition(rotation, getModulePositions(),
                 new Pose2d(poseEstimator.getEstimatedPosition().getTranslation(), rotation.rotateBy(Rotation2d.fromDegrees(angle))));
@@ -302,8 +308,8 @@ public class Chassis extends SubsystemBase {
         double angle = DriverStation.getAlliance() == Alliance.Blue? 0 : 180;
         // double angle = !UtilsGeneral.isRedAlliance()? 0 : 180;
         System.out.println(angle);
-        gyro.setYaw(0);
-        gyro.setFusedHeading(0);
+       // gyro.setYaw(0);
+        //gyro.setFusedHeading(0);
         Rotation2d rotation = getGyroRotation();
         poseEstimator.resetPosition(rotation, getModulePositions(),
                 new Pose2d(poseEstimator.getEstimatedPosition().getTranslation(), rotation.rotateBy(Rotation2d.fromDegrees(angle))));
@@ -367,7 +373,7 @@ public class Chassis extends SubsystemBase {
      * @return The roll of the robot
      */
     public double getRoll() {
-        return gyro.getRoll() - startRoll;
+        return 0;
     }
 
     /**
@@ -376,7 +382,7 @@ public class Chassis extends SubsystemBase {
      * @return The pitch of the robot
      */
     public double getPitch() {
-        return gyro.getPitch() - startPitch;
+        return 0;
     }
 
     /**
@@ -402,7 +408,7 @@ public class Chassis extends SubsystemBase {
      */
     public double getUpAngularVel() {
         double[] arr = new double[3];
-        gyro.getRawGyro(arr);
+        //gyro.getRawGyro(arr);
         double sign;
         if (Math.abs(arr[0]) > Math.abs(arr[1]))
             sign = Math.signum(arr[0]);
@@ -436,10 +442,10 @@ public class Chassis extends SubsystemBase {
     @Override
     public void periodic() {
         poseEstimator.update(getGyroRotation(), getModulePositions());
-        if (!DriverStation.isAutonomous() || DriverStation.isDisabled()){
-            updatePosition(Vision.LimeLight2.GetPair());
-            updatePosition(Vision.LimeLight3.GetPair());
-        }
+        // if (!DriverStation.isAutonomous() || DriverStation.isDisabled()){
+        //     updatePosition(Vision.LimeLight2.GetPair());
+        //     updatePosition(Vision.LimeLight3.GetPair());
+        // }
         field.setRobotPose(getPose());
     }
 
@@ -451,6 +457,7 @@ public class Chassis extends SubsystemBase {
         SmartDashboard.putData("Front Right Module", modules[1]);
         SmartDashboard.putData("Back Left Module", modules[2]);
         SmartDashboard.putData("Back Right Module", modules[3]);
+        modules[1].putMotors();
 
         SmartDashboard.putData("Field", field);
 

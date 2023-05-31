@@ -25,16 +25,20 @@ public class ChassisCommands {
     
     public static Command createPathFollowingCommand(PathPlannerTrajectory trajectory,
     boolean resetPose, boolean keepPosition, Command onTrajectoryEnd) {
+        PIDController x = new PIDController(ChassisConstants.AUTO_TRANSLATION_KP, ChassisConstants.AUTO_TRANSLATION_KI,
+                        0),
+                y = new PIDController(ChassisConstants.AUTO_TRANSLATION_KP, ChassisConstants.AUTO_TRANSLATION_KI,
+                        0),
+                r = new PIDController(ChassisConstants.AUTO_ROTATION_KP, ChassisConstants.AUTO_ROTATION_KI, 0);
+                x.setTolerance(0.01);
+                y.setTolerance(0.01);
+                r.setTolerance(0.1);
 var command = new SequentialCommandGroup(
-        new PPSwerveControllerCommand(
+        new PPSwerveControl(
                 trajectory,
                 Chassis.GetInstance()::getPose,
                 ChassisConstants.KINEMATICS,
-                new PIDController(ChassisConstants.AUTO_TRANSLATION_KP, ChassisConstants.AUTO_TRANSLATION_KI,
-                        0),
-                new PIDController(ChassisConstants.AUTO_TRANSLATION_KP, ChassisConstants.AUTO_TRANSLATION_KI,
-                        0),
-                new PIDController(ChassisConstants.AUTO_ROTATION_KP, ChassisConstants.AUTO_ROTATION_KI, 0),
+                x,y,r,
                 (ChassisSpeeds)->{
                     try{Chassis.GetInstance().setModuleStates(ChassisSpeeds);}
                     catch(Exception e){System.out.println("Chassis instance is null");}},
@@ -43,7 +47,7 @@ var command = new SequentialCommandGroup(
                         (keepPosition ? new KeepPosition(Chassis.GetInstance(),
                                 new Pose2d(trajectory.getEndState().poseMeters.getTranslation(),
                                         trajectory.getEndState().holonomicRotation))
-                                : new InstantCommand())
+                                : new InstantCommand(()->{System.out.println("KEEP POSITION FALSE");}))
                                 .andThen(onTrajectoryEnd)),
         new InstantCommand(() -> System.out.println(("Trajectory ended"))));
     return command;

@@ -76,19 +76,19 @@ public class ChassisConstants {
     public static final double MAX_SPEED = 4.2; // meters per second
     public static final double MAX_ACCELERATION = 8; // meters per second squared
     public static final double MAX_AUTO_ACCELERATION = 3; // meters per second squared
-    public static final double MAX_AUTO_SPEED = 2;
+    public static final double MAX_AUTO_SPEED = 4;
     public static final PathConstraints PATH_CONSTRAINTS = new PathConstraints(MAX_AUTO_SPEED, MAX_AUTO_ACCELERATION);
     public static final PathConstraints PATH_CONSTANTS_AUTO_MIDDLE = new PathConstraints(0.75, MAX_AUTO_ACCELERATION);
     public static final double MAX_DRIVE_SPEED = 4;
     public static final double MAX_ANGULAR_SPEED = 2 * Math.PI; // radians per second
 
-    public static final double AUTO_TRANSLATION_KP = 2;
-    public static final double AUTO_TRANSLATION_KI = 0.4;
-    public static final double AUTO_ROTATION_KP = 1.35;
-    public static final double AUTO_ROTATION_KI = 0.8;
+    public static final double AUTO_TRANSLATION_KP = 6;
+    public static final double AUTO_TRANSLATION_KI = 0.1;
+    public static final double AUTO_ROTATION_KP = Math.toRadians(100);
+    public static final double AUTO_ROTATION_KI = Math.toRadians(0.1);
 
     public static final double TELEOP_ROTATION_KP = 3;
-    public static final double TELEOP_ROTATION_KI = 0.3;
+    public static final double TELEOP_ROTATION_KI = 2;
 
     public static final double TELEOP_ANGLE_TOLERANCE = Math.toRadians(1.5);
 

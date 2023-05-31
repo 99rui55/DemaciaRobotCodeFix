@@ -5,6 +5,7 @@ import java.util.function.Supplier;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -24,7 +25,7 @@ import frc.robot.utilities.UtilsGeneral;
  * This command is used to go to the nodes on the field from the community.
  */
 //TODO: Changed Y values. prev values were 1.38
-public class GotoNodes{
+public class GotoNodes implements Sendable{
     private static final Translation2d[][] NODES = {
         { new Translation2d(1.34 , 0.51 ), new Translation2d(1.34 , 1.07 ), new Translation2d(1.34 , 1.63 ) },
         { new Translation2d(1.34 , 2.17 ), new Translation2d(1.34 , 2.75 ), new Translation2d(1.34 , 3.3 ) },
@@ -118,21 +119,21 @@ public class GotoNodes{
         secondary.povDown().onTrue(new InstantCommand(()->level = changeLevel(level)).ignoringDisable(true));
         this.chassis = chassis;
         this.parallelogram = parallelogram;
-        onPosition = (()->parallelogram.getGoToAngleCommand(Constants.DEPLOY_ANGLE));
+        onPosition = (()->parallelogram.getGoToAngleCommand(Constants.DEPLOY_ANGLE).withTimeout(2));
         command = new InstantCommand();
         isScheduled = false;
     }
 
     public Level changeLevel(Level level){
         if(level == Level.HIGH){
-            onPosition = ()->parallelogram.getGoToAngleCommand(Constants.DEPLOY_ANGLE_LOW);
+            onPosition = ()->parallelogram.getGoToAngleCommand(Constants.DEPLOY_ANGLE_LOW).withTimeout(2);
             return Level.LOW;
         }else if (level == Level.LOW) {
-            onPosition = ()->parallelogram.getGoToAngleCommand(Constants.DEPLOY_ANGLE);
+            onPosition = ()->parallelogram.getGoToAngleCommand(Constants.DEPLOY_ANGLE).withTimeout(2);
             return Level.MIDDLE;
         }
         else {
-            onPosition = ()->parallelogram.getGoToAngleCommand(Constants.DEPLOY_HIGH_CUBES1);
+            onPosition = ()->parallelogram.getGoToAngleCommand(Constants.DEPLOY_HIGH_CUBES1).withTimeout(2);
             return Level.HIGH;
         }
     }
@@ -185,6 +186,7 @@ public class GotoNodes{
     }
 
     public Command GetCommand(){
+        GenerateCommand();
         return command;
     }
 

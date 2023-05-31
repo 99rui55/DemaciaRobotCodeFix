@@ -40,7 +40,6 @@ public class RobotContainer {
     private GotoNodes gotoNodes;
     private GotoCommunity gotoCommunity;
 
-
   // The robot's subsystems and commands are defined here...
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
@@ -48,13 +47,14 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     UtilsGeneral.initializeDeafultAllianceChooser();
-        chassis = Chassis.GetInstance();
+        chassis = Chassis.CreateInstance();
         parallelogram = new Parallelogram();
         chassis.setDefaultCommand(new Drive(chassis, main.getHID()));
         SmartDashboard.putData((Sendable) chassis.getDefaultCommand());
         SmartDashboard.putData(chassis);
         gripper = new Gripper(GripperConstants.MOTOR_ID);
-        gotoNodes = new GotoNodes(chassis, secondary, parallelogram);
+        gotoNodes = new GotoNodes(chassis, main, parallelogram);
+        SmartDashboard.putData("gotonoeew", (Sendable)gotoNodes);
         gotoCommunity = new GotoCommunity(chassis);
         SmartDashboard.putData(gripper);
         configureButtonBindings();
@@ -87,16 +87,10 @@ public class RobotContainer {
     unload.setName("Unload");
 
     //Change X from auto place to Go to manual angle parallelogram
-    main.x().onTrue(new InstantCommand(()->parallelogram.getGoToAngleCommand(Constants.MANUAL_PLACEMENT).schedule()));
-    main.y().onTrue(new InstantCommand(() -> parallelogram.getGoBackCommand().schedule()));
-    main.povRight().onTrue(parallelogram.getGoToAngleCommand(Constants.DEPLOY_ANGLE));
-    main.povUp().onTrue(parallelogram.getGoToAngleCommand(Constants.LOADING_ANGLE));
-    main.povDown().onTrue(new StartEndCommand(chassis::setRampPosition, chassis::stop, chassis)
-            .until(() -> UtilsGeneral.hasInput(main.getHID())));
-    main.povLeft().onTrue(parallelogram.getGoToAngleCommand(Constants.DEPLOY_HIGH_CUBES1));
-
-    secondary.back().and(secondary.start())
-            .whileTrue(new RunCommand(() -> CommandScheduler.getInstance().cancelAll()));
+    main.a().onTrue(new InstantCommand(()->{
+      System.out.println("CPMMAND COMMAND COAMMND");
+      gotoNodes.GetCommand().schedule();
+  }));
 
     main.start().onTrue(new InstantCommand(()->chassis.setAngleTo180DependsOnAlliance()).ignoringDisable(true));
     main.back().onTrue(new InstantCommand(()->chassis.setAngleTo0DependsOnAlliance()).ignoringDisable(true));
@@ -110,6 +104,6 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An example command will be run in autonomous
-    return null;
+    return new InstantCommand(()->{chassis.setAngleVelocityWithAcceleration(100, 0, 0);});
   }
 }
