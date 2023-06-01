@@ -17,6 +17,8 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
+import frc.robot.RobotContainer;
+
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -277,6 +279,7 @@ public class PPSwerveControl extends CommandBase implements Sendable {
     if (logSetpoint != null) {
       logSetpoint.accept(targetChassisSpeeds);
     }
+    RobotContainer.getInstance().drive.updateValues();
   }
 
   @Override

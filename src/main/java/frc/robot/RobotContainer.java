@@ -31,7 +31,7 @@ import frc.robot.utilities.UtilsGeneral;
  */
 public class RobotContainer {
 
-  private static RobotContainer instance;
+  private static RobotContainer instance = new RobotContainer();
     private final CommandXboxController main = new CommandXboxController(0);
     public final CommandXboxController secondary = new CommandXboxController(1);
     private final Chassis chassis;
@@ -39,17 +39,19 @@ public class RobotContainer {
     private final Gripper gripper;
     private GotoNodes gotoNodes;
     private GotoCommunity gotoCommunity;
+    public Drive drive;
 
   // The robot's subsystems and commands are defined here...
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
-  public RobotContainer() {
+  private RobotContainer() {
     UtilsGeneral.initializeDeafultAllianceChooser();
         chassis = Chassis.CreateInstance();
         parallelogram = new Parallelogram();
-        chassis.setDefaultCommand(new Drive(chassis, main.getHID()));
+        drive = new Drive(chassis, main.getHID());
+        chassis.setDefaultCommand(drive);
         SmartDashboard.putData((Sendable) chassis.getDefaultCommand());
         SmartDashboard.putData(chassis);
         gripper = new Gripper(GripperConstants.MOTOR_ID);
@@ -62,6 +64,15 @@ public class RobotContainer {
         SmartDashboard.putData(CommandScheduler.getInstance());
         SmartDashboard.putBoolean("is left led", false);
   }
+
+
+
+    public static RobotContainer getInstance(){
+      return instance;
+    }
+
+
+
 
   /**
    * Use this method to define your trigger->command mappings. Triggers can be created via the

@@ -23,6 +23,11 @@ public class Drive extends CommandBase {
     private final XboxController controller;
     private double scaleVelocity = 2;
     private double scaleRotation = 2;
+    private double vx;
+    private double vy;
+    private double omega;
+    private Rotation2d angle;
+    private boolean red;
 
     /**
      * Creates a new DriveVelocities.
@@ -37,20 +42,26 @@ public class Drive extends CommandBase {
         addRequirements(chassis);
     }
 
-    @Override
-    public void execute() {
-        boolean red = UtilsGeneral.isRedAlliance();
+    public void updateValues(){
+         red = UtilsGeneral.isRedAlliance();
         Translation2d xy = UtilsGeneral.getScaledStick(controller, ControllerSide.LEFT, scaleVelocity)
                 .times(red ? -1 : 1);
-        double vx = -xy.getX() * ChassisConstants.MAX_DRIVE_SPEED;
-        double vy = -xy.getY() * ChassisConstants.MAX_DRIVE_SPEED;
-        double omega = UtilsGeneral.getScaledTriggerDiff(controller, ControllerSide.LEFT, scaleRotation)
+         vx = -xy.getX() * ChassisConstants.MAX_DRIVE_SPEED;
+         vy = -xy.getY() * ChassisConstants.MAX_DRIVE_SPEED;
+         omega = UtilsGeneral.getScaledTriggerDiff(controller, ControllerSide.LEFT, scaleRotation)
                 * ChassisConstants.MAX_ANGULAR_SPEED;
-        Rotation2d angle = UtilsGeneral.getStickRotation(controller, ControllerSide.RIGHT);
-        if (angle == null)
-            chassis.setVelocitiesAcceleration(vx, vy, omega);
-        else
-            chassis.setAngleVelocityWithAcceleration(vx, vy, angle.getRadians() + Math.PI / 2 * (red ? 1 : -1));
+         angle = UtilsGeneral.getStickRotation(controller, ControllerSide.RIGHT);
+    }
+
+    @Override
+    public void execute() {
+        updateValues();
+        if (angle == null){
+        chassis.setVelocitiesAcceleration(vx, vy, omega);
+        }
+        else{
+        chassis.setAngleVelocityWithAcceleration(vx, vy, angle.getRadians() + Math.PI / 2 * (red ? 1 : -1));
+        }
     }
 
     @Override
@@ -62,5 +73,7 @@ public class Drive extends CommandBase {
     public void initSendable(SendableBuilder builder) {
         builder.addDoubleProperty("Velocity Scale", () -> scaleVelocity, (s) -> scaleVelocity = s);
         builder.addDoubleProperty("Rotation Scale", () -> scaleRotation, (s) -> scaleRotation = s);
+        builder.addDoubleProperty("DRIVE X", ()->{return vx;}, null);
+        builder.addDoubleProperty("DRIVE Y", ()->{return vy;}, null);
     }
 }
