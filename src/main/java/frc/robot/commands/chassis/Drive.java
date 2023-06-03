@@ -75,5 +75,7 @@ public class Drive extends CommandBase {
         builder.addDoubleProperty("Rotation Scale", () -> scaleRotation, (s) -> scaleRotation = s);
         builder.addDoubleProperty("DRIVE X", ()->{return vx;}, null);
         builder.addDoubleProperty("DRIVE Y", ()->{return vy;}, null);
+        builder.addDoubleProperty("Angle", ()->{try{return angle.getRadians();}catch(Exception e){return 5635;}}, null);
+        builder.addDoubleProperty("OMEGA", ()->{return omega;}, null);
     }
 }

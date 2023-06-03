@@ -44,6 +44,7 @@ import frc.robot.utilities.Vision;
 import frc.robot.utilities.UtilsGeneral;
 import frc.robot.utilities.VisionUtils;
 
+ 
 /**
  * The subsystem that controls the robot's swerve chassis
  */
@@ -162,10 +163,6 @@ public class Chassis extends SubsystemBase {
         else {
             ChassisSpeeds speeds = ChassisSpeeds.fromFieldRelativeSpeeds(vx, vy, omega, getRotation());
             SwerveModuleState[] states = ChassisConstants.KINEMATICS.toSwerveModuleStates(speeds);
-            // System.out.println("SPEEDS: -------------------------------");
-            // System.out.println(vx);
-            // System.out.println(vy);
-            // System.out.println(omega);
             setModuleStates(states);
         }
     }
@@ -256,6 +253,7 @@ public class Chassis extends SubsystemBase {
      */
     public void stop() {
         Arrays.stream(modules).forEach(SwerveModule::stop);
+        gyro.setSpeedDS(0);
     }
 
     public void setRampPosition() {

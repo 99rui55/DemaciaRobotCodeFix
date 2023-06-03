@@ -36,7 +36,10 @@
   "NetworkTables": {
     "transitory": {
       "SmartDashboard": {
-        "Trajectory": {
+        "Field": {
+          "open": true
+        },
+        "gotonoeew": {
           "open": true
         },
         "open": true
