@@ -53,7 +53,7 @@ public class Chassis extends SubsystemBase {
 
     private final Field2d field;
     private final SwerveModule[] modules;
-    private final Gyro gyro;
+    private final PigeonIMU gyro;
     private final SwerveDrivePoseEstimator poseEstimator;
     private final PIDController angleController;
     private final double startRoll = 0, startPitch = 0;
@@ -74,13 +74,17 @@ public class Chassis extends SubsystemBase {
         return instance;
     }
 
+    public void setPosToFrontNodeTest(){
+        poseEstimator.resetPosition(getGyroRotation(), getModulePositions(), new Pose2d(new Translation2d(14,0.5),Rotation2d.fromDegrees(0)));
+    }
+
     /**
      * Creates a new Chassis.
      */
     private Chassis() {
         field = new Field2d();
         pathDisplay = new Field2d();
-        gyro = new Gyro();
+        gyro = new PigeonIMU(14);
         modules = new SwerveModule[] {
                 new SwerveModule(SwerveModuleConstants.FRONT_LEFT),
                 new SwerveModule(SwerveModuleConstants.FRONT_RIGHT),
@@ -116,7 +120,7 @@ public class Chassis extends SubsystemBase {
      * @return The angle of the robot, between 0 and 360 degrees
      */
     public double getGyroAngle() {
-        return UtilsGeneral.normalizeDegrees(gyro.GetAngle());
+        return UtilsGeneral.normalizeDegrees(gyro.getFusedHeading());
     }
 
     /**
@@ -225,8 +229,6 @@ public class Chassis extends SubsystemBase {
             modules[i].setState(states[i]);
         }
 
-        ChassisSpeeds tempSpeed = ChassisConstants.KINEMATICS.toChassisSpeeds(states);
-        gyro.setSpeedDS(Math.toDegrees(tempSpeed.omegaRadiansPerSecond));
     }
 
     /**
@@ -253,7 +255,6 @@ public class Chassis extends SubsystemBase {
      */
     public void stop() {
         Arrays.stream(modules).forEach(SwerveModule::stop);
-        gyro.setSpeedDS(0);
     }
 
     public void setRampPosition() {
@@ -455,7 +456,6 @@ public class Chassis extends SubsystemBase {
         SmartDashboard.putData("Front Right Module", modules[1]);
         SmartDashboard.putData("Back Left Module", modules[2]);
         SmartDashboard.putData("Back Right Module", modules[3]);
-        modules[1].putMotors();
 
         SmartDashboard.putData("Field", field);
 

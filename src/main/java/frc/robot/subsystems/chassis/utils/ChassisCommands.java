@@ -26,7 +26,7 @@ public class ChassisCommands {
     public static Command createPathFollowingCommand(PathPlannerTrajectory trajectory,
     boolean resetPose, boolean keepPosition, Command onTrajectoryEnd) {
         PIDController x = new PIDController(ChassisConstants.AUTO_TRANSLATION_KP, ChassisConstants.AUTO_TRANSLATION_KI,
-                        0),
+                        ChassisConstants.AUTO_TRANSLATION_KD),
                 y = new PIDController(ChassisConstants.AUTO_TRANSLATION_KP, ChassisConstants.AUTO_TRANSLATION_KI,
                         0),
                 r = new PIDController(ChassisConstants.AUTO_ROTATION_KP, ChassisConstants.AUTO_ROTATION_KI, 0);
@@ -48,7 +48,7 @@ var command = new SequentialCommandGroup(
                                 new Pose2d(trajectory.getEndState().poseMeters.getTranslation(),
                                         trajectory.getEndState().holonomicRotation))
                                 : new InstantCommand(()->{System.out.println("KEEP POSITION FALSE");}))
-                                .andThen(onTrajectoryEnd)),
+                                .andThen(onTrajectoryEnd!=null? onTrajectoryEnd: new InstantCommand())),
         new InstantCommand(() -> System.out.println(("Trajectory ended"))));
     return command;
 }

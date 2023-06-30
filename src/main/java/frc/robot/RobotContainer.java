@@ -103,6 +103,8 @@ public class RobotContainer {
       gotoNodes.GetCommand().schedule();
   }));
 
+  main.x().onTrue(new InstantCommand(()->{chassis.setPosToFrontNodeTest();}).ignoringDisable(true));
+
     main.start().onTrue(new InstantCommand(()->chassis.setAngleTo180DependsOnAlliance()).ignoringDisable(true));
     main.back().onTrue(new InstantCommand(()->chassis.setAngleTo0DependsOnAlliance()).ignoringDisable(true));
 

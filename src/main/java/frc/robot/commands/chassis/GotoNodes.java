@@ -172,7 +172,7 @@ public class GotoNodes implements Sendable{
 
         generator.add(new Pose2d(node, Rotation2d.fromDegrees(180)));
 
-        command = ChassisCommands.createPathFollowingCommand(onPosition.get(),false, false, generator.generate(chassis.getPose()));
+        command = ChassisCommands.createPathFollowingCommand(null ,false, false, generator.generate(chassis.getPose()));
     }
 
     /**

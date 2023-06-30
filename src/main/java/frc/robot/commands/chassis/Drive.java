@@ -46,8 +46,8 @@ public class Drive extends CommandBase {
          red = UtilsGeneral.isRedAlliance();
         Translation2d xy = UtilsGeneral.getScaledStick(controller, ControllerSide.LEFT, scaleVelocity)
                 .times(red ? -1 : 1);
-         vx = -xy.getX() * ChassisConstants.MAX_DRIVE_SPEED;
-         vy = -xy.getY() * ChassisConstants.MAX_DRIVE_SPEED;
+         vx = -xy.getY() * ChassisConstants.MAX_DRIVE_SPEED;
+         vy = xy.getX() * ChassisConstants.MAX_DRIVE_SPEED;
          omega = UtilsGeneral.getScaledTriggerDiff(controller, ControllerSide.LEFT, scaleRotation)
                 * ChassisConstants.MAX_ANGULAR_SPEED;
          angle = UtilsGeneral.getStickRotation(controller, ControllerSide.RIGHT);
